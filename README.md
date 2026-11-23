@@ -1,8 +1,10 @@
 # meterbill: does clarity-ctl help a fresh agent that has to rely on project history?
 
-This directory holds the whole evaluation behind the "Does it work?" section of the top-level README: the
-design, the frozen tasks and hidden tests, every transcript, the harness, and the scripts that rebuild the numbers.
-It is written for someone who wants to check the claim, not accept it.
+This repository holds the whole evaluation behind the "Does it work?" section of the
+[clarity-ctl README](https://github.com/danishnxt/clarity-ctl#does-it-work): the design, the frozen tasks and hidden
+tests, every transcript, the harness, and the scripts that rebuild the numbers. It is written for someone who wants to
+check the claim, not accept it. clarity-ctl includes it as a git submodule at `eval/meterbill`, pinned to a commit of
+this repository; until 2026-11-23 it lived in that folder directly, and its history here starts there.
 
 ## What is claimed
 
@@ -22,6 +24,23 @@ What the data supports, precisely (details and tables below):
   memory cost about +17k (CLAUDE.md) and +12-14k (clarity-ctl) cost-weighted tokens per task over no memory (12-17k).
 - Samples are small: 1-3 runs per cell. Two epoch-24 cells have a single run.
 
+## How to read this
+
+- **Order.** The claim above, then [Results](#results), then [Known limits](#known-limits). [Design](#design) and
+  [What was frozen when](#what-was-frozen-when) are for checking that the tasks were not tuned after the results.
+- **Checkpoints.** e8, e16 and e24 are the project after 8, 16 and 24 sessions of history. Each has its own table.
+- **A cell** reads `passes/runs, mean tokens (each run)`: `0/3, 57k (51, 62, 58)` is three runs, none passed, a mean
+  of 57k tokens. Tokens are cost-weighted (see [Metric](#metric)); lower is cheaper. Compare arms across a row; rows
+  are different tasks and their sizes differ.
+- **Groups.** *History-only* tasks are the test: the deciding fact exists only in the project's history, so they are
+  the only ones memory can win. *Answer in code* and *control* tasks show what keeping memory costs when it isn't
+  needed.
+- **The figure** (`eval-light.png`, `eval-dark.png`) shows only the history-only tasks, CLAUDE.md vs clarity-ctl:
+  bars are the mean, dots are single runs, an `x` is a failed run.
+- **One run, in full:** `results/tasks/<checkpoint>/<task>/<arm>/r<N>.meta.json` has the grade (which hidden tests
+  passed) and token usage, `r<N>.diff` the code change, `r<N>.jsonl.gz` the whole transcript. The task's prompt,
+  hidden tests and trap patches are in `tasks/<checkpoint>/<task>/`.
+
 ## Design
 
 - **A synthetic project.** `meterbill` is a Python 3.12, standard-library-only usage-billing library (events, plans,
@@ -40,7 +59,10 @@ What the data supports, precisely (details and tables below):
     in-progress work, "keep it under 200 lines"), maintained after every epoch.
   - *clarity-ctl*: `clarity-ctl init` output (AGENTS.md block, worklog, EPOCHS/), maintained through clarity-ctl after
     every epoch. Run without `repo add`, so epochs carry no branch. The clarity-ctl used was the one installed on the
-    author's machine (it reports 0.1.0); the exact commit is not recorded in the results.
+    author's machine (it reports 0.1.0); the exact commit is not recorded in the results. The transcripts use the
+    flat command set without `--agent`, which matches clarity-ctl
+    [`ade9a4a`](https://github.com/danishnxt/clarity-ctl/commit/ade9a4a) (2026-11-11), main when the eval ran; its
+    code is unchanged since `eb6d77b`.
 - **Replay.** The two written arms never saw the builder sessions. After each epoch a fresh session got the user's
   request, the builder's final report and the diffstat, and updated that arm's memory the way the project's
   instructions say, without changing code (`results/replay/`, memory snapshot per epoch in `results/memory/`).
@@ -199,17 +221,17 @@ messaging-socket fields were removed from result and init events. Thinking-block
     results/replay/<arm>/   memory-writing sessions;  results/memory/<arm>/eNN/ snapshots
     results/tasks/<ckpt>/<ID>/<arm>/r<N>.{jsonl.gz,meta.json,diff}   task sessions
     results/noop/           context-leak check;  results/E16.md E24.md SLICE.md E24-covariates.md figure-data.csv
-    eval-light.png, eval-dark.png   the figure in the top-level README
+    eval-light.png, eval-dark.png   the figure (a copy is in clarity-ctl's `docs/` for its README)
 
 ## Reproduce
 
-Needs Python 3.12, `uv`, and for new sessions `claude` and `clarity-ctl` on PATH. From the repository root:
+Needs Python 3.12, `uv`, and for new sessions `claude` and `clarity-ctl` on PATH. From this repository's root (inside clarity-ctl: `eval/meterbill`):
 
     # numbers and figure from the published transcripts (no sessions are run)
     mkdir -p /tmp/fig/results
-    uv run --with matplotlib python eval/meterbill/harness/figure.py eval/meterbill /tmp/fig   # eval-*.png, results/figure-data.csv
-    diff /tmp/fig/results/figure-data.csv eval/meterbill/results/figure-data.csv                 # no output = identical
-    cd eval/meterbill/harness
+    uv run --with matplotlib python harness/figure.py . /tmp/fig   # eval-*.png, results/figure-data.csv
+    diff /tmp/fig/results/figure-data.csv results/figure-data.csv   # no output = identical
+    cd harness
     uv run --with pyyaml python report.py --at e16     # rewrites results/E16.md
     uv run --with pyyaml python report.py --at e24     # rewrites results/E24.md
     uv run --with pyyaml python validate.py --help     # hidden tests vs patches (needs the code repo, see harness/README.md)

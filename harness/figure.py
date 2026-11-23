@@ -1,8 +1,8 @@
 """The headline figure: tokens per run on the history-only tasks, clarity-ctl vs a hand-kept CLAUDE.md.
 
-    uv run --with matplotlib python eval/meterbill/harness/figure.py [root [outdir]]
+    uv run --with matplotlib python harness/figure.py [root [outdir]]
 
-`root` is the eval directory (default: the parent of this harness/ directory, i.e. eval/meterbill).
+`root` is the eval directory (default: the parent of this harness/ directory, i.e. this repository).
 Reads <root>/results/tasks/<checkpoint>/<task>/<arm>/r*.{meta.json,jsonl[.gz]}. Usage is summed over
 EVERY `result` event in a session's jsonl (a backgrounded command can wake a finished session for
 another turn, which writes a second result event). Discarded runs (folders starting with `_`) and

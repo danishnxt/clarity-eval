@@ -17,7 +17,7 @@ from pathlib import Path
 import yaml
 
 HERE = Path(__file__).resolve().parent
-MB = HERE.parent                                    # eval/meterbill (story.yaml, arms.md, tasks/, harness/, results/)
+MB = HERE.parent                                    # the repository root (story.yaml, arms.md, tasks/, harness/, results/)
 RESULTS = MB / "results"
 STORY = MB / "story.yaml"
 ARMS_MD = MB / "arms.md"
