@@ -1,4 +1,4 @@
-# clarity-ctl-eval
+# clarity-eval
 
 Does a coding agent do better with project memory when the answer is only in the project's history,
 not in the code? This is the test behind the "Does it work?" claim in
