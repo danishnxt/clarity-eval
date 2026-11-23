@@ -55,7 +55,7 @@ the code: visible suite, hidden target tests, hidden keep tests. Output per sess
 `../results/tasks/<checkpoint>/<ID>/<arm>/r<rep>.{jsonl,meta.json,diff}`. After a usage limit the run stops starting
 sessions, prints `REMAINING (usage limit): [...]` and exits with code 3; rerun the same command later.
 
-The published e24 run stopped at 18 of the 30 sessions, by the owner's decision (see `../README.md`).
+The published e24 run stopped at 18 of the 30 sessions, by the owner's decision (see `../METHOD.md`).
 
 ## Usage is summed over every `result` event
 
